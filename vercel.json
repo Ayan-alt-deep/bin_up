@@ -1,5 +1,4 @@
 {
-  "version": 2,
   "builds": [
     {
       "src": "api/upload.js",
@@ -7,9 +6,6 @@
     }
   ],
   "routes": [
-    {
-      "src": "/api/upload",
-      "dest": "/api/upload.js"
-    }
+    { "src": "/api/upload", "dest": "api/upload.js" }
   ]
 }
