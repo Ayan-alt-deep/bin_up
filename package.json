@@ -1,20 +1,12 @@
 {
-  "name": "file-upload-api",
+  "name": "bin-up",
   "version": "1.0.0",
-  "description": "File upload API using Multer",
   "main": "index.js",
-  "type": "module", 
-  "scripts": {
-    "dev": "vercel dev",   
-    "build": "vercel build",
-    "start": "vercel start"
-  },
   "dependencies": {
-    "express": "^4.17.1",    
-    "multer": "^1.4.5",      
-    "axios": "^0.21.1"      
+    "express": "^4.17.1",
+    "multer": "^1.4.5-lts.1"
   },
-  "devDependencies": {
-    "vercel": "^25.0.0"
+  "scripts": {
+    "start": "node index.js"
   }
 }
