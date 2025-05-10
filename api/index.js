@@ -1,18 +1,41 @@
-const express = require('express');
-const multer = require('multer');
-const app = express();
+import formidable from 'formidable';
+import fs from 'fs';
+import path from 'path';
 
-// Use memory storage (Vercel doesn't allow writing to disk)
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
-app.post('/upload', upload.single('file'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No file received.' });
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Only POST method is allowed' });
   }
 
-  // You can process or forward req.file.buffer here
-  res.json({ message: 'File uploaded successfully (in memory).' });
-});
+  const form = new formidable.IncomingForm({
+    uploadDir: path.join(process.cwd(), 'public', 'uploads'),
+    keepExtensions: true,
+    filename: (name, ext, part) => `${Date.now()}-${part.originalFilename}`,
+  });
 
-module.exports = app;
+  // Ensure upload dir exists
+  fs.mkdirSync(path.join(process.cwd(), 'public', 'uploads'), { recursive: true });
+
+  form.parse(req, (err, fields, files) => {
+    if (err) {
+      console.error('Upload error:', err);
+      return res.status(500).json({ error: 'File upload failed' });
+    }
+
+    const file = files.file;
+    const filePath = path.basename(file[0].filepath);
+    const fileUrl = `${req.headers.host}/uploads/${filePath}`;
+
+    return res.status(200).json({
+      success: true,
+      url: `https://${fileUrl}`,
+      raw: `https://${fileUrl}` // <- this is what your bot reads as data.raw
+    });
+  });
+}
