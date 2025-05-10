@@ -1,15 +1,12 @@
 {
-  "name": "apibin-api-vercel",
+  "name": "apibin-api",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "api/index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node api/index.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "express-rate-limit": "^6.7.0",
-    "fs": "^0.0.1-security",
-    "multer": "^1.4.5-lts.1",
-    "path": "^0.12.7"
+    "multer": "^1.4.5"
   }
 }
