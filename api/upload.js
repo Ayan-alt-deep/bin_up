@@ -1,27 +1,36 @@
-import multer from 'multer';
-import * as fs from 'fs';
-
-// Set up multer for file storage
-const upload = multer({ dest: './uploads/' });
+import formidable from 'formidable';
+import fs from 'fs';
+import path from 'path';
 
 export const config = {
   api: {
-    bodyParser: false, // Disabling Vercel's body parser to handle file uploads manually
+    bodyParser: false,
   },
 };
 
-const handler = (req, res) => {
-  if (req.method === 'POST') {
-    const uploadMiddleware = upload.single('file');
-    uploadMiddleware(req, res, (err) => {
-      if (err) {
-        return res.status(500).json({ error: 'Failed to upload file' });
-      }
-      return res.status(200).json({ message: 'File uploaded successfully', file: req.file });
-    });
-  } else {
-    res.status(405).json({ error: 'Method Not Allowed' });
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Only POST method allowed' });
   }
-};
 
-export default handler;
+  const uploadDir = path.join(process.cwd(), 'uploads');
+  fs.mkdirSync(uploadDir, { recursive: true });
+
+  const form = new formidable.IncomingForm({ uploadDir, keepExtensions: true });
+
+  form.parse(req, async (err, fields, files) => {
+    if (err || !files.file) {
+      return res.status(400).json({ error: 'Upload failed' });
+    }
+
+    const file = files.file[0];
+    const fileName = Date.now() + '-' + file.originalFilename;
+    const newPath = path.join(uploadDir, fileName);
+    fs.renameSync(file.filepath, newPath);
+
+    const baseUrl = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}`;
+    const rawUrl = `${baseUrl}/api/upload?file=${fileName}`;
+
+    res.json({ status: 'success', raw: rawUrl });
+  });
+}
